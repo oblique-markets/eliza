@@ -34,12 +34,12 @@ The full subpath list lives in the `exports` map of `package.json`.
 
 ```bash
 bun run --cwd packages/app-core build       # tsc → flatten → copy assets → rewrite dist ESM imports
-bun run --cwd packages/app-core typecheck   # tsgo --noEmit
+bun run --cwd packages/app-core typecheck   # tsc --noEmit
 bun run --cwd packages/app-core test         # vitest
 bun run --cwd packages/app-core lint         # Biome
 ```
 
-This package is consumed by `@elizaos/agent`, `@elizaos/ui`, `@elizaos/shared`, the `packages/app` shell, and most `plugins/*` app plugins. It targets Node `>=24`, with `react`/`react-dom`/`three` as peer dependencies and the `@elizaos/capacitor-*` mobile bridges as optional dependencies.
+This package supplies host integration to the `packages/app` shell and app-facing plugins. It targets Node `>=24`, with `react`/`react-dom`/`three` as peer dependencies and the `@elizaos/capacitor-*` mobile bridges as optional dependencies.
 
 ## Native inference setup
 
@@ -57,3 +57,14 @@ setup failures fail the install instead of reporting inference as ready.
 `ELIZA_SKIP_FUSED_INFERENCE_SETUP=1` is an explicit escape hatch and does not
 establish runtime readiness. Android and iOS packaging use their platform build
 lanes to produce the corresponding NDK or Apple artifacts.
+
+
+Android Bun runtime inputs for x64 and arm64 are pinned in
+[`scripts/lib/android-bun-artifacts.lock.json`](scripts/lib/android-bun-artifacts.lock.json).
+Both stable and canary channels resolve fixed GitHub release-asset IDs, archive
+checksums, executable checksums, and source revisions. Staging verifies the
+archive before extraction and the executable on every cache use; a mismatch
+fails the build. Update the lock deliberately when changing runtime versions.
+`ELIZA_BUN_X64_FILE` and `ELIZA_BUN_AARCH64_FILE` can supply downloaded ZIPs for
+local or offline builds, and must match those same pins. RISC-V retains its
+separate OS cross-build artifact and checksum contract.

@@ -488,7 +488,6 @@ if (TARGET === "ios-jsc") {
 // let them bundle. The mobile plugin filter still strips them out of the
 // runtime load set, so they don't try to register at boot.
 const optionalPluginStubs = {
-  "@elizaos/plugin-cli": path.join(stubsDir, "null-plugin.cjs"),
   "@elizaos/plugin-agent-orchestrator": path.join(stubsDir, "null-plugin.cjs"),
   "@elizaos/plugin-coding-tools": path.join(stubsDir, "null-plugin.cjs"),
   // NOTE: @elizaos/plugin-commands is intentionally NOT stubbed. Its only

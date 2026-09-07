@@ -2,6 +2,7 @@
  * Renders the chat overlay that keeps the composer and transcript
  * available across views.
  */
+
 import { logger } from "@elizaos/logger";
 import { MAX_CHAT_MEDIA_RAW_BYTES } from "@elizaos/shared";
 import { transcriptPlainText } from "@elizaos/shared/transcripts";
@@ -33,6 +34,7 @@ import {
 } from "motion/react";
 import * as React from "react";
 import { type OrbState, ThinkingOrb } from "thinking-orbs";
+import { ChatVoiceStatusBar } from "../composites/chat/ChatVoiceStatusBar";
 
 type ChatSheetMotionStyle = MotionStyle & {
   "--chat-composer-background"?: string | MotionValue<string>;
@@ -1007,7 +1009,15 @@ function SheetGrabber({
         aria-label={open ? "drag down to close chat" : "drag up to open chat"}
         data-testid="chat-sheet-grabber"
         data-open={open ? "true" : "false"}
+        onClick={(event) => {
+          // Assistive activation has no pointer sequence. Pointer taps already
+          // toggle through the gesture binding and must not be replayed here.
+          if (disabled || event.detail !== 0) return;
+          if (open) onClose();
+          else onOpen();
+        }}
         onKeyDown={(e) => {
+          if (disabled) return;
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             if (open) onClose();
@@ -1374,6 +1384,7 @@ export function ChatOverlay({
     setTranscriptSessionSink,
     setComposerHasDraft,
     needsAudioUnlock,
+    ttsError,
     unlockAudio,
     openSettings,
     navigateHome,
@@ -5857,6 +5868,12 @@ export function ChatOverlay({
           pointerEvents: "none",
         }}
       />
+
+      {ttsError ? (
+        <div className="pointer-events-auto relative mb-2 w-full max-w-3xl">
+          <ChatVoiceStatusBar status="idle" ttsError={ttsError} visible />
+        </div>
+      ) : null}
 
       {/* Audio-unlock prompt. When autoplay policy blocks the first spoken
           reply, the ambient overlay would otherwise go silent with no recourse
